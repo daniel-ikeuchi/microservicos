@@ -25,7 +25,7 @@ public class CambioController {
 			@PathVariable String to) {
 		BigDecimal convertedValue = amount.multiply(BigDecimal.TEN);
 		return new Cambio(1L, from, to, amount, convertedValue, 
-				environment.getProperty("server.local.port"));
+				environment.getProperty("local.server.port"));
 	}
 	
 }
