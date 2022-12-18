@@ -20,7 +20,7 @@ public class BookController {
 	public Book findBook(
 			@PathVariable Long id,
 			@PathVariable String currency) {
-		return service.findBook(id);
+		return service.findBook(id, currency);
 	}
 	
 }
