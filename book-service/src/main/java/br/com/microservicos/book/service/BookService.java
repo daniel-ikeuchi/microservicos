@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import br.com.microservicos.book.model.Book;
+import br.com.microservicos.book.proxy.CambioProxy;
 import br.com.microservicos.book.repository.BookRepository;
 import br.com.microservicos.book.response.Cambio;
 
@@ -23,6 +24,9 @@ public class BookService {
 
 	@Autowired
 	private BookRepository repository;
+	
+	@Autowired
+	private CambioProxy proxy;
 
 	public Book findBook(Long id, String currency) {
 		Optional<Book> book = repository.findById(id);
@@ -31,14 +35,8 @@ public class BookService {
 			throw new RuntimeException("Book not found!");
 		}
 		
-		Map<String, String> params = new HashMap<>();
-		params.put("amount", book.get().getPrice().toString());
-		params.put("from", "USD");
-		params.put("to", currency);
-		
-		var cambio = new RestTemplate().getForEntity("http://localhost:8001/cambio-service/"
-				+ "{amount}/{from}/{to}", Cambio.class, params);
-		BigDecimal convertedValue = cambio.getBody().getConvertedValue();
+		Cambio cambio = proxy.getCambio(book.get().getPrice(), "USD", currency);
+		BigDecimal convertedValue = cambio.getConvertedValue();
 
 		String port = environment.getProperty("local.server.port");
 		book.get().setPrice(convertedValue.setScale(2, RoundingMode.HALF_EVEN));
